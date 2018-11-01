@@ -66,6 +66,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Apollo15DataSet3.xsd</DependentUpon>
     </Compile>
+    <Compile Include="connection.cs" />
     <Compile Include="login.cs">
       <SubType>Form</SubType>
     </Compile>

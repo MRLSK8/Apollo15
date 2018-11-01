@@ -13,8 +13,12 @@ namespace PLPMonitoria
 {
 	public partial class newOrder : Form
 	{
+        OleDbConnection con;
 		public newOrder()
 		{
+            connection c = new connection();
+            con = c.con;
+
 			InitializeComponent();
 		}
 
@@ -45,9 +49,6 @@ namespace PLPMonitoria
 		private void btnAdd_Click(object sender, EventArgs e)
 		{
 
-			// String de conection com o banco de dados
-			string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\Aline\Desktop\Apollo15\Apollo15.mdb";
-			
 			// Checando se o numero de produto é maior que zero
 			if (numFood.Value != 0)
 			{
@@ -62,12 +63,11 @@ namespace PLPMonitoria
 							// Conectando com o banco de dados
 							try
 							{	
-								OleDbConnection conecting = new OleDbConnection(strConection);
 								// Abrindo o banco de dados
-								conecting.Open();
+								con.Open();
 
 								string cmd1 = @"SELECT price FROM Food WHERE nome = '"+ cmbFood.GetItemText(cmbFood.SelectedItem)+"'";
-								OleDbCommand comand = new OleDbCommand(cmd1, conecting);
+								OleDbCommand comand = new OleDbCommand(cmd1, con);
 								OleDbDataReader read_price_food = comand.ExecuteReader();
 								read_price_food.Read();
 
@@ -77,7 +77,7 @@ namespace PLPMonitoria
 								// Inserindo o pedido (comida) no banco de dados
 								string orderfood = "Insert Into FoodOrders(client, board_number, food, quant_food, total) Values";
 								orderfood += "('" + txtName.Text + "','" + txtTable.Text + "', '" + cmbFood.GetItemText(cmbFood.SelectedItem) + "','" + numFood.Value.ToString() + "','" + String.Format("{0:0.00}", totalfood) + "')";
-								OleDbCommand comando = new OleDbCommand(orderfood, conecting);
+								OleDbCommand comando = new OleDbCommand(orderfood, con);
 								comando.ExecuteNonQuery();
 
 								// Alterando o label Detalhes do pedido (adicionando o nome do cliente)
@@ -86,7 +86,7 @@ namespace PLPMonitoria
 								dataOrder.Rows.Add("Comida",cmbFood.GetItemText(cmbFood.SelectedItem), numFood.Value.ToString(), "R$ " + String.Format("{0:0.00}", read_price_food["price"]), txtTable.Text);
 
 								// Fechando o banco de dados
-								conecting.Close();
+								con.Close();
 							}
 							catch 
 							{
@@ -123,13 +123,12 @@ namespace PLPMonitoria
 							// Conectando com o banco de dados
 							try
 							{
-								OleDbConnection conecting = new OleDbConnection(strConection);
 								// Abrindo o banco de dados
-								conecting.Open();
+								con.Open();
 
 								// Lendo o preço da comida
 								string cmd1 = @"SELECT price fROM Drink WHERE nome = '" + cmbDrink.GetItemText(cmbDrink.SelectedItem) + "'";
-								OleDbCommand comand= new OleDbCommand(cmd1, conecting);
+								OleDbCommand comand= new OleDbCommand(cmd1, con);
 								OleDbDataReader read_price_drink = comand.ExecuteReader();
 								read_price_drink.Read();
 
@@ -139,7 +138,7 @@ namespace PLPMonitoria
 								// Inserindo o pedido (comida) no banco de dados
 								string orderfood = "Insert Into DrinkOrders(client, board_number, drink, quant_drink, total) Values";
 								orderfood += "('" + txtName.Text + "','" + txtTable.Text + "', '" + cmbDrink.GetItemText(cmbDrink.SelectedItem) + "','" + numDrink.Value.ToString() + "','" + String.Format("{0:0.00}", totaldrink) + "')";
-								OleDbCommand comando = new OleDbCommand(orderfood, conecting);
+								OleDbCommand comando = new OleDbCommand(orderfood, con);
 								comando.ExecuteNonQuery();
 
 								// Alterando o label Detalhes do pedido (adicionando o nome do cliente)
@@ -147,7 +146,7 @@ namespace PLPMonitoria
 								// Adicionando o pedido ao DataGridView
 								dataOrder.Rows.Add("Bebida", cmbDrink.GetItemText(cmbDrink.SelectedItem), numDrink.Value.ToString(), "R$ " + String.Format("{0:0.00}", read_price_drink["price"]), txtTable.Text); 								
 								// Fechando o banco de dados
-								conecting.Close();
+								con.Close();
 							}
 							catch (Exception erro)
 							{
@@ -176,14 +175,12 @@ namespace PLPMonitoria
 			{
 				// Gasto total do cliente
 				double spent = 0;
-				// Conectando com o banco de dados
-				OleDbConnection conecting = new OleDbConnection(strConection);
 				// Abrindo o banco de dados
-				conecting.Open();
+				con.Open();
 				
 				// Selecionando quanto foi gasto em comida com pedidos anteriores
 				string sqlconnection1 = "SELECT * FROM FoodOrders WHERE client =  '" + txtName.Text + "'";
-				OleDbCommand cmd1 = new OleDbCommand(sqlconnection1, conecting);
+				OleDbCommand cmd1 = new OleDbCommand(sqlconnection1, con);
 				OleDbDataReader prices = cmd1.ExecuteReader();
 				
 				// Somando gastos com pedidos anteriores
@@ -194,7 +191,7 @@ namespace PLPMonitoria
 
 				// Selecionando quanto foi gasto em bebida com pedidos anteriores
 				string sqlconnection2 = "SELECT * FROM DrinkOrders WHERE client = '" + txtName.Text + "'";
-				OleDbCommand cmd2 = new OleDbCommand(sqlconnection2, conecting);
+				OleDbCommand cmd2 = new OleDbCommand(sqlconnection2, con);
 				OleDbDataReader prices2 = cmd2.ExecuteReader();
 
 				while (prices2.Read())
@@ -207,7 +204,7 @@ namespace PLPMonitoria
 
 				// Verifica se é uma mesa que já está no banco de dados
 				string sqlJaExiste = "SELECT * FROM ClientOrders";
-				OleDbCommand cmd3 = new OleDbCommand(sqlJaExiste, conecting);
+				OleDbCommand cmd3 = new OleDbCommand(sqlJaExiste, con);
 				OleDbDataReader verificamesa = cmd3.ExecuteReader();
 
 				bool jatem = false;
@@ -216,7 +213,7 @@ namespace PLPMonitoria
 					if(verificamesa["board_number"].ToString() == txtTable.Text)
 					{
 						string atualiza_spent = @"UPDATE ClientOrders SET spent =  '" + String.Format("{0:0.00}", spent) + "' WHERE client =  '" + txtName.Text  + "'";
-						OleDbCommand comand = new OleDbCommand(atualiza_spent, conecting);
+						OleDbCommand comand = new OleDbCommand(atualiza_spent, con);
 						comand.ExecuteNonQuery();
 						jatem = true;
 						break;
@@ -228,11 +225,11 @@ namespace PLPMonitoria
 					// Adicionando pedido do client no banco de dados
 					string SQL = "Insert Into ClientOrders(status, client, board_number, spent) Values";
 					SQL += "('Em andamento','" + txtName.Text + "','" + txtTable.Text + "','" + String.Format("{0:0.00}", spent) + "')";
-					OleDbCommand comando = new OleDbCommand(SQL, conecting);
+					OleDbCommand comando = new OleDbCommand(SQL, con);
 					comando.ExecuteNonQuery();
 				}
 				// Fechando o banco de dados
-				conecting.Close();
+				con.Close();
 			}
 			catch
 			{
@@ -277,14 +274,11 @@ namespace PLPMonitoria
 			// Preechendo o Combobox com dados do banco de dados 
 			try
 			{
-				// String de conection com o banco de dados
-				string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\Aline\Desktop\Apollo15\Apollo15.mdb";
-				OleDbConnection conecting = new OleDbConnection(strConection);
-				conecting.Open();
+				con.Open();
 
 				cmbFood.Items.Clear();
 				string cmd1 = "SELECT * FROM Food ORDER BY nome ASC";
-				OleDbCommand comand1 = new OleDbCommand(cmd1, conecting);
+				OleDbCommand comand1 = new OleDbCommand(cmd1, con);
 				OleDbDataAdapter adapter1 = new OleDbDataAdapter(comand1);
 				DataTable table1 = new DataTable();
 
@@ -296,7 +290,7 @@ namespace PLPMonitoria
 				// -------------------------------------------------------------------
 				cmbDrink.Items.Clear();
 				string cmd2 = "SELECT * FROM Drink ORDER BY nome ASC";
-				OleDbCommand comand2 = new OleDbCommand(cmd2, conecting);
+				OleDbCommand comand2 = new OleDbCommand(cmd2, con);
 				OleDbDataAdapter adapter2 = new OleDbDataAdapter(comand2);
 				DataTable table2 = new DataTable();
             
@@ -309,7 +303,7 @@ namespace PLPMonitoria
 				cmbFood.SelectedIndex = -1;
 				cmbDrink.SelectedIndex = -1;
 				// Fechando o banco de dados
-				conecting.Close();
+				con.Close();
 			}
 			catch
 			{
@@ -332,10 +326,7 @@ namespace PLPMonitoria
 			
 			try
 			{
-				// String de conection com o banco de dados
-				string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\Aline\Desktop\Apollo15\Apollo15.mdb";
-				OleDbConnection conecting = new OleDbConnection(strConection);
-				conecting.Open();
+				con.Open();
 
 				// Nome do produto selecionado 
 				string Produto_selecionado = dataOrder.Rows[dataOrder.CurrentRow.Index].Cells[1].Value.ToString();
@@ -348,7 +339,7 @@ namespace PLPMonitoria
 				{
 					// Seleciona o total gasto(spent)
 					string totalgasto = @"SELECT spent FROM ClientOrders WHERE board_number = '" + Mesa + "'";
-					OleDbCommand comando = new OleDbCommand(totalgasto, conecting);
+					OleDbCommand comando = new OleDbCommand(totalgasto, con);
 					OleDbDataReader lerspent = comando.ExecuteReader();
 					lerspent.Read();
 					// Adiciona o total gasto à variavel "spent"
@@ -356,7 +347,7 @@ namespace PLPMonitoria
 
 					// Ler quanto foi gasto no pedido q vai ser deletado
 					string totalgastodeletado = @"SELECT total FROM DrinkOrders WHERE drink = '" + Produto_selecionado + "' and board_number = '" + Mesa + "'";
-					OleDbCommand cmd = new OleDbCommand(totalgastodeletado, conecting);
+					OleDbCommand cmd = new OleDbCommand(totalgastodeletado, con);
 					OleDbDataReader lertotaldeletado = cmd.ExecuteReader();
 					lertotaldeletado.Read();
 
@@ -365,12 +356,12 @@ namespace PLPMonitoria
 
 					// Exclui o pedido
 					string ExluiPedido = @"DELETE FROM DrinkOrders WHERE drink = '" + Produto_selecionado + "' and board_number = '" + Mesa +"'";
-					OleDbCommand comand = new OleDbCommand(ExluiPedido, conecting);
+					OleDbCommand comand = new OleDbCommand(ExluiPedido, con);
 					comand.ExecuteNonQuery();
 
 					// Atualiza o total gasto do client
 					string atualiza_spent = @"UPDATE ClientOrders SET spent =  '" + String.Format("{0:0.00}", spent) + "' WHERE board_number = '" + Mesa + "'";
-					OleDbCommand comando3 = new OleDbCommand(atualiza_spent, conecting);
+					OleDbCommand comando3 = new OleDbCommand(atualiza_spent, con);
 					comando3.ExecuteNonQuery();
 
 					// Mudando o total de todos o pedidos (tela de pedidos)
@@ -382,7 +373,7 @@ namespace PLPMonitoria
 				{
 					// Seleciona o total gasto(spent)
 					string totalgasto = @"SELECT spent FROM ClientOrders WHERE board_number = '" + Mesa + "'";
-					OleDbCommand comando = new OleDbCommand(totalgasto, conecting);
+					OleDbCommand comando = new OleDbCommand(totalgasto, con);
 					OleDbDataReader lerspent = comando.ExecuteReader();
 					lerspent.Read();
 
@@ -391,7 +382,7 @@ namespace PLPMonitoria
 
 					// Ler quanto foi gasto no pedido q vai ser deletado
 					string totalgastodeletado = @"SELECT total FROM FoodOrders WHERE food = '" + Produto_selecionado + "' and board_number = '" + Mesa + "'";
-					OleDbCommand cmd = new OleDbCommand(totalgastodeletado, conecting);
+					OleDbCommand cmd = new OleDbCommand(totalgastodeletado, con);
 					OleDbDataReader lertotaldeletado = cmd.ExecuteReader();
 					lertotaldeletado.Read();
 
@@ -400,12 +391,12 @@ namespace PLPMonitoria
 
 
 					string ExluiPedido2 = @"DELETE FROM FoodOrders WHERE food = '" + Produto_selecionado + "' and board_number = '" + Mesa + "'";
-					OleDbCommand comando4 = new OleDbCommand(ExluiPedido2, conecting);
+					OleDbCommand comando4 = new OleDbCommand(ExluiPedido2, con);
 					comando4.ExecuteNonQuery();
 
 					// Atualiza o total gasto do client
 					string atualiza_spent = @"UPDATE ClientOrders SET spent =  '" + String.Format("{0:0.00}", spent) + "' WHERE board_number = '" + Mesa + "'";
-					OleDbCommand comando3 = new OleDbCommand(atualiza_spent, conecting);
+					OleDbCommand comando3 = new OleDbCommand(atualiza_spent, con);
 					comando3.ExecuteNonQuery();
 
 					// Mudando o total de todos o pedidos (tela de pedidos)
@@ -417,7 +408,7 @@ namespace PLPMonitoria
 				dataOrder.Rows.Remove(dataOrder.CurrentRow);
 
 				// Fechando o banco de dados
-				conecting.Close();
+				con.Close();
 			}
 			catch
 
@@ -430,10 +421,7 @@ namespace PLPMonitoria
 		{
 			try
 			{
-				// String de conection com o banco de dados
-				string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\Aline\Desktop\Apollo15\Apollo15.mdb";
-				OleDbConnection conecting = new OleDbConnection(strConection);
-				conecting.Open();
+				con.Open();
 
 				// Nome do produto selecionado 
 				string Produto_selecionado = dataOrder.Rows[dataOrder.CurrentRow.Index].Cells[1].Value.ToString();
@@ -452,7 +440,7 @@ namespace PLPMonitoria
 
 					// Seleciona o total gasto(spent)
 					string totalgasto = @"SELECT spent FROM ClientOrders WHERE board_number = '" + Mesa + "'";
-					OleDbCommand comando = new OleDbCommand(totalgasto, conecting);
+					OleDbCommand comando = new OleDbCommand(totalgasto, con);
 					OleDbDataReader lerspent = comando.ExecuteReader();
 					lerspent.Read();
 
@@ -461,7 +449,7 @@ namespace PLPMonitoria
 
 					// Ler quanto foi gasto no pedido q vai ser deletado
 					string totalgastodeletado = @"SELECT total FROM DrinkOrders WHERE drink = '" + Produto_selecionado + "' and board_number = '" + Mesa + "'";
-					OleDbCommand cmd = new OleDbCommand(totalgastodeletado, conecting);
+					OleDbCommand cmd = new OleDbCommand(totalgastodeletado, con);
 					OleDbDataReader lertotaldeletado = cmd.ExecuteReader();
 					lertotaldeletado.Read();
 
@@ -470,7 +458,7 @@ namespace PLPMonitoria
 
 					// Atualiza o total gasto do client
 					string atualiza_spent = @"UPDATE ClientOrders SET spent =  '" + String.Format("{0:0.00}", spent) + "' WHERE board_number = '" + Mesa + "'";
-					OleDbCommand comando3 = new OleDbCommand(atualiza_spent, conecting);
+					OleDbCommand comando3 = new OleDbCommand(atualiza_spent, con);
 					comando3.ExecuteNonQuery();
 
 					// Mudando o total de todos o pedidos (tela de pedidos)
@@ -478,7 +466,7 @@ namespace PLPMonitoria
 
 					// Deleta do banco de dados este pedido
 					string ExluiPedido = @"DELETE FROM DrinkOrders WHERE drink = '" + Produto_selecionado + "'";
-					OleDbCommand comand = new OleDbCommand(ExluiPedido, conecting);
+					OleDbCommand comand = new OleDbCommand(ExluiPedido, con);
 					comand.ExecuteNonQuery();
 				}
 				// Caso o pedido selecionado for comida
@@ -490,7 +478,7 @@ namespace PLPMonitoria
 
 					// Seleciona o total gasto(spent)
 					string totalgasto = @"SELECT spent FROM ClientOrders WHERE board_number = '" + Mesa + "'";
-					OleDbCommand comando = new OleDbCommand(totalgasto, conecting);
+					OleDbCommand comando = new OleDbCommand(totalgasto, con);
 					OleDbDataReader lerspent = comando.ExecuteReader();
 					lerspent.Read();
 
@@ -499,7 +487,7 @@ namespace PLPMonitoria
 
 					// Ler quanto foi gasto no pedido q vai ser deletado
 					string totalgastodeletado = @"SELECT total FROM FoodOrders WHERE food= '" + Produto_selecionado + "' and board_number = '" + Mesa + "'";
-					OleDbCommand cmd = new OleDbCommand(totalgastodeletado, conecting);
+					OleDbCommand cmd = new OleDbCommand(totalgastodeletado, con);
 					OleDbDataReader lertotaldeletado = cmd.ExecuteReader();
 					lertotaldeletado.Read();
 
@@ -508,14 +496,14 @@ namespace PLPMonitoria
 
 					// Atualiza o total gasto do client
 					string atualiza_spent = @"UPDATE ClientOrders SET spent =  '" + String.Format("{0:0.00}", spent) + "' WHERE board_number = '" + Mesa + "'";
-					OleDbCommand comando3 = new OleDbCommand(atualiza_spent, conecting);
+					OleDbCommand comando3 = new OleDbCommand(atualiza_spent, con);
 					comando3.ExecuteNonQuery();
 
 					// Mudando o total de todos o pedidos (tela de pedidos)
 					lblTotal.Text = "Total: R$ " + String.Format("{0:f2}", spent);
 
 					string ExluiPedido2 = @"DELETE FROM FoodOrders WHERE food = '" + Produto_selecionado + "'";
-					OleDbCommand comand = new OleDbCommand(ExluiPedido2, conecting);
+					OleDbCommand comand = new OleDbCommand(ExluiPedido2, con);
 					comand.ExecuteNonQuery();
 				}
 
@@ -523,7 +511,7 @@ namespace PLPMonitoria
 				dataOrder.Rows.Remove(dataOrder.CurrentRow);
 
 				// Fechando o banco de dados
-				conecting.Close();
+				con.Close();
 			}
 			catch 
 			{

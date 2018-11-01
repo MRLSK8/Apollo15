@@ -13,8 +13,13 @@ namespace PLPMonitoria
 {
     public partial class Orders : Form
     {
+        OleDbConnection con;
         public Orders()
         {
+            connection c = new connection();
+            con = c.con;
+
+
             InitializeComponent();
         }
 
@@ -34,13 +39,11 @@ namespace PLPMonitoria
 		{
 			try
 			{
-				string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\Aline\Desktop\Apollo15\Apollo15.mdb";
-				OleDbConnection conecting = new OleDbConnection(strConection);
 				// Abrindo o banco de dados
-				conecting.Open();
+				con.Open();
 
 				string cmd1 = @"SELECT * FROM ClientOrders WHERE status = 'Em andamento' or status = 'Em preparo' ";
-				OleDbCommand comand = new OleDbCommand(cmd1, conecting);
+				OleDbCommand comand = new OleDbCommand(cmd1, con);
 				OleDbDataReader boardNumber = comand.ExecuteReader();
 				
 
@@ -49,7 +52,7 @@ namespace PLPMonitoria
 				{
 					dataOrder.Rows.Add(boardNumber["board_number"], boardNumber["status"]);
 				}
-				conecting.Close();
+				con.Close();
 			}
 			catch
 			{
@@ -72,24 +75,21 @@ namespace PLPMonitoria
 				{
 					if (dataOrder.RowCount != 0)
 					{
-						// String de conection com o banco de dados
-						string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\Aline\Desktop\Apollo15\Apollo15.mdb";
-						OleDbConnection conecting = new OleDbConnection(strConection);
-						conecting.Open();
+						con.Open();
 
 						// Nome do produto selecionado 
 						string numTable = dataOrder.Rows[dataOrder.CurrentRow.Index].Cells[0].Value.ToString();
 
 						// Comando que atualiza o status
 						string atualiza_status = @"UPDATE ClientOrders SET status = '" + cmbFood.GetItemText(cmbFood.SelectedItem) + "' WHERE board_number =  '" + numTable.ToString() + "'";
-						OleDbCommand comand = new OleDbCommand(atualiza_status, conecting);
+						OleDbCommand comand = new OleDbCommand(atualiza_status, con);
 						comand.ExecuteNonQuery();
 
 						// Remove a linha selecionada no datagridview
 						dataOrder.Rows.Remove(dataOrder.CurrentRow);
 
                         string cmd1 = @"SELECT * FROM ClientOrders WHERE status = 'Em andamento' or status = 'Em preparo' ";
-                        OleDbCommand fill = new OleDbCommand(cmd1, conecting);
+                        OleDbCommand fill = new OleDbCommand(cmd1, con);
                         OleDbDataReader boardNumber = fill.ExecuteReader();
 
                         dataOrder.Rows.Clear();
@@ -99,7 +99,7 @@ namespace PLPMonitoria
                             dataOrder.Rows.Add(boardNumber["board_number"], boardNumber["status"]);
                         }
                         // Fechando o banco de dados
-                        conecting.Close();
+                        con.Close();
 					}
 					else
 					{
