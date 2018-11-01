@@ -57,5 +57,10 @@ namespace PLPMonitoria
             nt.Show();
             this.Hide();
         }
-    }
+
+		private void lblOrders_Click(object sender, EventArgs e)
+		{
+
+		}
+	}
 }

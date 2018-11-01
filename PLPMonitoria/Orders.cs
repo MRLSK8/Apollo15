@@ -34,7 +34,7 @@ namespace PLPMonitoria
 		{
 			try
 			{
-				string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\mateus\Documents\Apollo15\Apollo15.mdb";
+				string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\Aline\Desktop\Apollo15\Apollo15.mdb";
 				OleDbConnection conecting = new OleDbConnection(strConection);
 				// Abrindo o banco de dados
 				conecting.Open();
@@ -73,7 +73,7 @@ namespace PLPMonitoria
 					if (dataOrder.RowCount != 0)
 					{
 						// String de conection com o banco de dados
-						string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\mateus\Documents\Apollo15\Apollo15.mdb";
+						string strConection = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\Aline\Desktop\Apollo15\Apollo15.mdb";
 						OleDbConnection conecting = new OleDbConnection(strConection);
 						conecting.Open();
 
@@ -84,9 +84,6 @@ namespace PLPMonitoria
 						string atualiza_status = @"UPDATE ClientOrders SET status = '" + cmbFood.GetItemText(cmbFood.SelectedItem) + "' WHERE board_number =  '" + numTable.ToString() + "'";
 						OleDbCommand comand = new OleDbCommand(atualiza_status, conecting);
 						comand.ExecuteNonQuery();
-
-						// Atualiza o status do pedido no datagridview
-						//dataOrder.Rows[dataOrder.CurrentRow.Index].Cells[1].Value = cmbFood.SelectedItem.ToString();
 
 						// Remove a linha selecionada no datagridview
 						dataOrder.Rows.Remove(dataOrder.CurrentRow);
